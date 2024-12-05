@@ -55,10 +55,17 @@ function handleSubmit() {
   // Close modal
   isOpen.value = false;
 }
+
+function handleClose() {
+  isOpen.value = false;
+  formData.value.title = "";
+  formData.value.description = "";
+  formData.value.type = "";
+}
 </script>
 
 <template>
-  <Dialog :open="isOpen">
+  <Dialog :open="isOpen" @update:open="handleClose">
     <DialogTrigger asChild>
       <Button @click="isOpen = true">Create Node</Button>
     </DialogTrigger>

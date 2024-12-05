@@ -131,5 +131,22 @@ export const useFlowStore = defineStore("flow", {
       };
       this.nodes.push(newNode);
     },
+
+    getNodeById(id: string) {
+      return this.nodes.find((node) => node.id === id);
+    },
+
+    updateNode(
+      id: string,
+      nodeData: { title: string; description: string; type: string }
+    ) {
+      const nodeIndex = this.nodes.findIndex((node) => node.id === id);
+      if (nodeIndex !== -1) {
+        this.nodes[nodeIndex] = {
+          ...this.nodes[nodeIndex],
+          ...nodeData,
+        };
+      }
+    },
   },
 });

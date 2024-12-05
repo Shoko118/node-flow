@@ -30,7 +30,7 @@ onMounted(() => {
 onConnect((params) => addEdges([params]));
 
 onNodeClick(({ node }) => {
-  router.push(`/${node.id}`);
+  router.push(`/node/${node.id}`);
 });
 </script>
 
