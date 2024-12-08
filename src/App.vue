@@ -8,7 +8,7 @@ import CreateNodeDialog from "@/components/CreateNodeDialog.vue";
       <div class="container flex h-14 items-center px-4">
         <div class="flex flex-1 items-center justify-between">
           <nav>
-            <h2 class="text-lg font-semibold">Note Flow Chart</h2>
+            <h2 class="text-lg font-semibold">Node Flow Chart</h2>
           </nav>
           <CreateNodeDialog />
         </div>
