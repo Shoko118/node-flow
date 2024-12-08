@@ -4,7 +4,7 @@ import { Background } from "@vue-flow/background";
 import CustomNode from "./CustomNode.vue";
 import { useFlowStore } from "@/stores/useFlowStore";
 import { storeToRefs } from "pinia";
-import { onMounted } from "vue";
+import { onMounted, watch } from "vue";
 import { markRaw } from "vue";
 import { useRouter } from "vue-router";
 
@@ -13,7 +13,8 @@ const router = useRouter();
 const flowStore = useFlowStore();
 const { nodes, edges } = storeToRefs(flowStore);
 
-const { fitView, onConnect, addEdges, onNodeClick } = useVueFlow();
+const { fitView, onConnect, addEdges, onNodeClick, updateNodeData } =
+  useVueFlow();
 
 const nodeTypes = {
   custom: markRaw(CustomNode),
@@ -21,11 +22,24 @@ const nodeTypes = {
 
 onMounted(() => {
   flowStore.initializeFlow();
-
   setTimeout(() => {
     fitView({ padding: 0.2 });
   }, 0);
 });
+
+// watcher for nodes changes
+watch(
+  nodes,
+  () => {
+    nodes.value.map((node) => {
+      updateNodeData(node.id, node.data);
+    });
+    setTimeout(() => {
+      fitView({ padding: 0.2 });
+    }, 0);
+  },
+  { deep: true }
+);
 
 onConnect((params) => addEdges([params]));
 

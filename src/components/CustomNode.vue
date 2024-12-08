@@ -1,14 +1,19 @@
 <script setup lang="ts">
 import { Handle, Position } from "@vue-flow/core";
 import { MessageSquare, MessageCircle, Clock, Zap } from "lucide-vue-next";
+import { computed } from "vue";
 
-defineProps<{
+const { data } = defineProps<{
   data: {
     title?: string;
     description?: string;
     type?: "sendMessage" | "addComment" | "businessHours";
   };
 }>();
+
+const nodeTitle = computed(() => data?.title);
+const nodeDescription = computed(() => data?.description);
+const nodeType = computed(() => data?.type);
 
 const getNodeIcon = (type: string) => {
   switch (type) {
@@ -32,14 +37,14 @@ const getNodeIcon = (type: string) => {
 
     <div class="flex items-center gap-2 mb-2">
       <component
-        :is="getNodeIcon(data?.type ?? '')"
+        :is="getNodeIcon(nodeType ?? '')"
         class="w-5 h-5 text-gray-600"
       />
-      <h3 class="font-medium text-gray-800">{{ data?.title }}</h3>
+      <h3 class="font-medium text-gray-800">{{ nodeTitle }}</h3>
     </div>
 
     <p class="text-sm text-gray-600 truncate">
-      {{ data?.description }}
+      {{ nodeDescription }}
     </p>
 
     <Handle type="source" :position="Position.Bottom" class="w-3 h-3" />

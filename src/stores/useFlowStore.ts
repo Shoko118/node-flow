@@ -45,16 +45,12 @@ export const useFlowStore = defineStore("flow", {
     },
 
     initializeFlow() {
-      // Filter out connector nodes and handle trigger node's parent
-      const filteredData = noteData
-        .filter((item) => item.type !== "dateTimeConnector")
-        .map((item) => ({
-          ...item,
-          parentId: item.parentId === -1 ? undefined : item.parentId,
-        }));
+      const processNodeData = (item: any) => ({
+        ...item,
+        parentId: item.parentId === -1 ? undefined : item.parentId,
+      });
 
-      // Create visual nodes with positions and metadata
-      this.nodes = filteredData.map((item) => ({
+      const createNode = (item: any) => ({
         id: item.id.toString(),
         type: "custom",
         position: this.getNodePosition(item),
@@ -65,45 +61,55 @@ export const useFlowStore = defineStore("flow", {
           type: item.type,
           ...item.data,
         },
-      }));
+      });
 
+      const createEdge = (item: any, parentId: number) => {
+        const parentNode = noteData.find((n) => n.id === parentId);
+        const isFromDateTime = parentNode?.type === "dateTime";
+        const isSuccessPath =
+          isFromDateTime && item.data?.payload?.[0]?.text?.includes("welcome");
+
+        return {
+          id: `e${parentId}-${item.id}`,
+          source: parentId?.toString() ?? "",
+          target: item.id.toString(),
+          animated: false,
+          type: "smoothstep",
+          label: isFromDateTime
+            ? isSuccessPath
+              ? "Success"
+              : "Failure"
+            : undefined,
+          style: isFromDateTime
+            ? {
+                stroke: isSuccessPath ? "#22c55e" : "#ef4444",
+                strokeWidth: 2,
+              }
+            : undefined,
+        };
+      };
+
+      const getParentId = (item: any) => {
+        const parent = noteData.find((n) => n.id === item.parentId);
+        return parent?.type === "dateTimeConnector"
+          ? parent.parentId
+          : item.parentId;
+      };
+
+      // Process nodes
+      const filteredData = noteData
+        .filter((item) => item.type !== "dateTimeConnector")
+        .map(processNodeData);
+
+      // Create nodes
+      this.nodes = filteredData.map(createNode);
+
+      // Create edges
       this.edges = filteredData
         .filter((item) => item.parentId)
         .map((item) => {
-          let parentId = item.parentId;
-          const parent = noteData.find((n) => n.id === parentId);
-
-          // Skip connector nodes and connect directly to their parent
-          if (parent && parent.type === "dateTimeConnector") {
-            parentId = parent.parentId;
-          }
-
-          // Determine if this is a success or failure path
-          // Only add labels for paths coming from dateTime node
-          const parentNode = noteData.find((n) => n.id === parentId);
-          const isFromDateTime = parentNode?.type === "dateTime";
-          const isSuccessPath =
-            isFromDateTime &&
-            item.data?.payload?.[0]?.text?.includes("welcome");
-
-          return {
-            id: `e${parentId}-${item.id}`,
-            source: parentId?.toString() ?? "",
-            target: item.id.toString(),
-            animated: false,
-            type: "smoothstep",
-            label: isFromDateTime
-              ? isSuccessPath
-                ? "Success"
-                : "Failure"
-              : undefined,
-            style: isFromDateTime
-              ? {
-                  stroke: isSuccessPath ? "#22c55e" : "#ef4444",
-                  strokeWidth: 2,
-                }
-              : undefined,
-          };
+          const parentId = getParentId(item);
+          return createEdge(item, parentId);
         });
     },
 
@@ -142,10 +148,19 @@ export const useFlowStore = defineStore("flow", {
     ) {
       const nodeIndex = this.nodes.findIndex((node) => node.id === id);
       if (nodeIndex !== -1) {
-        this.nodes[nodeIndex] = {
+        // create a new node object to ensure reactivity
+        const updatedNode = {
           ...this.nodes[nodeIndex],
-          ...nodeData,
+          data: {
+            ...this.nodes[nodeIndex].data,
+            title: nodeData.title,
+            description: nodeData.description,
+            type: nodeData.type,
+          },
         };
+
+        // Update the node array
+        this.nodes.splice(nodeIndex, 1, updatedNode);
       }
     },
   },
