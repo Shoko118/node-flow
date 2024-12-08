@@ -96,15 +96,12 @@ export const useFlowStore = defineStore("flow", {
           : item.parentId;
       };
 
-      // Process nodes
       const filteredData = noteData
         .filter((item) => item.type !== "dateTimeConnector")
         .map(processNodeData);
 
-      // Create nodes
       this.nodes = filteredData.map(createNode);
 
-      // Create edges
       this.edges = filteredData
         .filter((item) => item.parentId)
         .map((item) => {
@@ -147,21 +144,15 @@ export const useFlowStore = defineStore("flow", {
       nodeData: { title: string; description: string; type: string }
     ) {
       const nodeIndex = this.nodes.findIndex((node) => node.id === id);
-      if (nodeIndex !== -1) {
-        // create a new node object to ensure reactivity
-        const updatedNode = {
-          ...this.nodes[nodeIndex],
-          data: {
-            ...this.nodes[nodeIndex].data,
-            title: nodeData.title,
-            description: nodeData.description,
-            type: nodeData.type,
-          },
-        };
+      if (nodeIndex === -1) return;
 
-        // Update the node array
-        this.nodes.splice(nodeIndex, 1, updatedNode);
-      }
+      this.nodes[nodeIndex] = {
+        ...this.nodes[nodeIndex],
+        data: {
+          ...this.nodes[nodeIndex].data,
+          ...nodeData,
+        },
+      };
     },
   },
 });
