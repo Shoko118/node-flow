@@ -7,6 +7,19 @@ interface FlowState {
   edges: Edge[];
 }
 
+interface Comment {
+  id: string;
+  text: string;
+}
+
+interface NodeData {
+  title: string;
+  description: string;
+  type: string;
+  attachments?: string[];
+  comments?: Comment[];
+}
+
 export const useFlowStore = defineStore("flow", {
   state: (): FlowState => ({
     nodes: [],
@@ -139,19 +152,13 @@ export const useFlowStore = defineStore("flow", {
       return this.nodes.find((node) => node.id === id);
     },
 
-    updateNode(
-      id: string,
-      nodeData: { title: string; description: string; type: string }
-    ) {
-      const nodeIndex = this.nodes.findIndex((node) => node.id === id);
-      if (nodeIndex === -1) return;
+    updateNode(id: string, data: NodeData) {
+      const node = this.nodes.find((node) => node.id === id);
+      if (!node) return;
 
-      this.nodes[nodeIndex] = {
-        ...this.nodes[nodeIndex],
-        data: {
-          ...this.nodes[nodeIndex].data,
-          ...nodeData,
-        },
+      node.data = {
+        ...node.data,
+        ...data,
       };
     },
   },

@@ -22,9 +22,40 @@ const { getNodeById, updateNode } = flowStore;
 const nodeTitle = ref("");
 const nodeDescription = ref("");
 const nodeType = ref("");
+const attachments = ref<string[]>([]);
+const comments = ref<{ text: string; id: string }[]>([]);
+const newComment = ref("");
 
 const handleClose = () => {
   router.push({ name: "home" });
+};
+
+const handleFileChange = (event: Event) => {
+  const input = event.target as HTMLInputElement;
+  if (input.files) {
+    const fileNames = Array.from(input.files).map((file) => file.name);
+    attachments.value.push(...fileNames);
+  }
+};
+
+const removeAttachment = (index: number) => {
+  attachments.value.splice(index, 1);
+};
+
+const addComment = () => {
+  if (newComment.value.trim()) {
+    comments.value.push({
+      text: newComment.value,
+      id: Math.random().toString(),
+    });
+
+    // Clear the input
+    newComment.value = "";
+  }
+};
+
+const removeComment = (index: number) => {
+  comments.value.splice(index, 1);
 };
 
 const handleSubmit = () => {
@@ -33,6 +64,8 @@ const handleSubmit = () => {
     title: nodeTitle.value,
     description: nodeDescription.value,
     type: nodeType.value,
+    attachments: attachments.value,
+    comments: comments.value,
   });
 
   // Close the drawer after updating
@@ -46,6 +79,8 @@ onMounted(() => {
     nodeTitle.value = node.data.title;
     nodeDescription.value = node.data.description;
     nodeType.value = node.data.type;
+    comments.value = node.data.comments ?? [];
+    attachments.value = node.data.attachments ?? [];
   }
 });
 </script>
@@ -74,6 +109,67 @@ onMounted(() => {
             v-model="nodeDescription"
             placeholder="Enter node description"
           />
+        </div>
+        <div class="space-y-2">
+          <label for="attachments" class="text-sm font-medium"
+            >File Attachments</label
+          >
+          <Input
+            id="attachments"
+            type="file"
+            multiple
+            @change="handleFileChange"
+          />
+
+          <div v-if="attachments.length > 0" class="mt-2">
+            <div
+              v-for="(fileName, index) in attachments"
+              :key="index"
+              class="flex items-center justify-between p-2 bg-gray-100 rounded-md mb-2"
+            >
+              <span class="text-sm truncate">{{ fileName }}</span>
+              <Button
+                variant="destructive"
+                size="sm"
+                @click="removeAttachment(index)"
+              >
+                Remove
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-2">
+          <label for="comments" class="text-sm font-medium">Comments</label>
+          <div class="flex gap-2">
+            <Input
+              id="comments"
+              v-model="newComment"
+              placeholder="Enter comment"
+            />
+            <Button @click="addComment">Add</Button>
+          </div>
+
+          <div v-if="comments.length > 0" class="mt-2">
+            <div
+              v-for="(comment, index) in comments"
+              :key="comment.id"
+              class="p-2 bg-gray-100 rounded-md mb-2"
+            >
+              <div class="flex justify-between items-center">
+                <div>
+                  <p class="text-sm">{{ comment.text }}</p>
+                </div>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  @click="removeComment(index)"
+                >
+                  Remove
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       <DrawerFooter class="space-x-2">

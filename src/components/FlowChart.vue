@@ -50,7 +50,9 @@ onNodeClick(({ node }) => {
 
 <template>
   <div class="p-4">
-    <div class="w-[800px] h-[600px] border rounded-lg bg-gray-50">
+    <div
+      class="w-[350px] md:w-[700px] lg:w-[900px] xl:w-[1300px] h-[600px] border rounded-lg bg-gray-50"
+    >
       <VueFlow :nodes="nodes" :edges="edges" :node-types="nodeTypes as any">
         <Background class="bg-gray-50" />
       </VueFlow>

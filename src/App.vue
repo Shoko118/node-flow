@@ -14,11 +14,10 @@ import CreateNodeDialog from "@/components/CreateNodeDialog.vue";
         </div>
       </div>
     </header>
-    <main class="container mx-auto py-4">
+    <main class="mx-auto container">
       <div class="flex items-center">
         <router-view></router-view>
         <router-view name="drawer"></router-view>
-        <div>utc</div>
       </div>
     </main>
   </div>
