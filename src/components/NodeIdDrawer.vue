@@ -11,9 +11,12 @@ import { Input } from "@/components/ui/input";
 import { useRoute, useRouter } from "vue-router";
 import { onMounted, ref } from "vue";
 import { useFlowStore } from "@/stores/useFlowStore";
+import { useMediaQuery } from "@/composables/useMediaQuery";
 
 const route = useRoute();
 const router = useRouter();
+
+const isMobile = useMediaQuery("(max-width: 600px)");
 
 const flowStore = useFlowStore();
 const { getNodeById, updateNode } = flowStore;
@@ -86,8 +89,12 @@ onMounted(() => {
 </script>
 
 <template>
-  <Drawer :open="true" @close="handleClose" direction="right">
-    <DrawerContent direction="right">
+  <Drawer
+    :open="true"
+    @close="handleClose"
+    :direction="isMobile ? 'bottom' : 'right'"
+  >
+    <DrawerContent :direction="isMobile ? 'bottom' : 'right'">
       <DrawerHeader>
         <DrawerTitle>Edit Node: {{ route.params.id }}</DrawerTitle>
       </DrawerHeader>
