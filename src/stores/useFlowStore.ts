@@ -58,11 +58,13 @@ export const useFlowStore = defineStore("flow", {
     },
 
     initializeFlow() {
+      // Processes node data by transforming parentId from -1 to undefined
       const processNodeData = (item: any) => ({
         ...item,
         parentId: item.parentId === -1 ? undefined : item.parentId,
       });
 
+      // Creates a node object with proper formatting for the flow diagram
       const createNode = (item: any) => ({
         id: item.id.toString(),
         type: "custom",
@@ -76,6 +78,7 @@ export const useFlowStore = defineStore("flow", {
         },
       });
 
+      // Creates an edge object connecting nodes, with special styling for dateTime connections
       const createEdge = (item: any, parentId: number) => {
         const parentNode = noteData.find((n) => n.id === parentId);
         const isFromDateTime = parentNode?.type === "dateTime";
@@ -102,6 +105,7 @@ export const useFlowStore = defineStore("flow", {
         };
       };
 
+      // Gets the actual parent ID by skipping dateTimeConnector nodes
       const getParentId = (item: any) => {
         const parent = noteData.find((n) => n.id === item.parentId);
         return parent?.type === "dateTimeConnector"
@@ -109,12 +113,15 @@ export const useFlowStore = defineStore("flow", {
           : item.parentId;
       };
 
+      // Filter out dateTimeConnector nodes and process the remaining data
       const filteredData = noteData
         .filter((item) => item.type !== "dateTimeConnector")
         .map(processNodeData);
 
+      // Create nodes from the filtered data
       this.nodes = filteredData.map(createNode);
 
+      // Create edges for nodes that have parents
       this.edges = filteredData
         .filter((item) => item.parentId)
         .map((item) => {
