@@ -30,7 +30,7 @@ export const useFlowStore = defineStore("flow", {
     getNodePosition(item: any): { x: number; y: number } {
       // Top center
       if (item.type === "trigger") {
-        return { x: 400, y: 0 };
+        return { x: 417, y: 0 };
       }
 
       // Center below trigger
@@ -167,6 +167,16 @@ export const useFlowStore = defineStore("flow", {
         ...node.data,
         ...data,
       };
+    },
+
+    deleteNode(nodeId: string) {
+      // Remove all edges connected to this node
+      this.edges = this.edges.filter(
+        (edge) => edge.source !== nodeId && edge.target !== nodeId
+      );
+
+      // Remove the node
+      this.nodes = this.nodes.filter((node) => node.id !== nodeId);
     },
   },
 });

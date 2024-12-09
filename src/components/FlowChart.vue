@@ -20,6 +20,12 @@ const nodeTypes = {
   custom: markRaw(CustomNode),
 };
 
+onConnect((params) => addEdges([params]));
+
+onNodeClick(({ node }) => {
+  router.push(`/node/${node.id}`);
+});
+
 onMounted(() => {
   flowStore.initializeFlow();
   setTimeout(() => {
@@ -27,7 +33,6 @@ onMounted(() => {
   }, 0);
 });
 
-// watcher for nodes changes
 watch(
   nodes,
   () => {
@@ -40,12 +45,6 @@ watch(
   },
   { deep: true }
 );
-
-onConnect((params) => addEdges([params]));
-
-onNodeClick(({ node }) => {
-  router.push(`/node/${node.id}`);
-});
 </script>
 
 <template>
