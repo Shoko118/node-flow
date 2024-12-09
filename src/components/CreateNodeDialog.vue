@@ -24,6 +24,12 @@ import {
 const flowStore = useFlowStore();
 
 const isOpen = ref<boolean>(false);
+const errors = ref<{
+  title?: string;
+  description?: string;
+  type?: string;
+}>({});
+
 const formData = ref<{
   title: string;
   description: string;
@@ -40,17 +46,42 @@ const nodeTypes = [
   { value: "businessHours", label: "Business Hours" },
 ] as const;
 
+function validateForm(): boolean {
+  errors.value = {};
+  let isValid = true;
+
+  if (!formData.value.title.trim()) {
+    errors.value.title = "Title is required";
+    isValid = false;
+  }
+
+  if (!formData.value.description.trim()) {
+    errors.value.description = "Description is required";
+    isValid = false;
+  }
+
+  if (!formData.value.type) {
+    errors.value.type = "Please select a node type";
+    isValid = false;
+  }
+
+  return isValid;
+}
+
 function handleSubmit() {
+  if (!validateForm()) return;
+
   flowStore.addNode({
     title: formData.value.title,
     description: formData.value.description,
     type: formData.value.type,
   });
 
-  // Reset form
+  // Reset form and errors
   formData.value.title = "";
   formData.value.description = "";
   formData.value.type = "";
+  errors.value = {};
 
   // Close modal
   isOpen.value = false;
@@ -61,6 +92,7 @@ function handleClose() {
   formData.value.title = "";
   formData.value.description = "";
   formData.value.type = "";
+  errors.value = {};
 }
 </script>
 
@@ -80,40 +112,56 @@ function handleClose() {
         <div class="grid gap-4 py-4">
           <div class="grid grid-cols-4 items-center gap-4">
             <Label for="title" class="text-right">Title</Label>
-            <Input
-              id="title"
-              v-model="formData.title"
-              class="col-span-3"
-              required
-            />
+            <div class="col-span-3">
+              <Input
+                id="title"
+                v-model="formData.title"
+                :class="{ 'border-red-500': errors.title }"
+              />
+              <span v-if="errors.title" class="text-sm text-red-500 mt-1">
+                {{ errors.title }}
+              </span>
+            </div>
           </div>
 
           <div class="grid grid-cols-4 items-center gap-4">
             <Label for="description" class="text-right">Description</Label>
-            <Input
-              id="description"
-              v-model="formData.description"
-              class="col-span-3"
-              required
-            />
+            <div class="col-span-3">
+              <Input
+                id="description"
+                v-model="formData.description"
+                :class="{ 'border-red-500': errors.description }"
+              />
+              <span v-if="errors.description" class="text-sm text-red-500 mt-1">
+                {{ errors.description }}
+              </span>
+            </div>
           </div>
 
           <div class="grid grid-cols-4 items-center gap-4">
             <Label for="type" class="text-right">Type of Node</Label>
-            <Select v-model="formData.type" required>
-              <SelectTrigger class="col-span-3">
-                <SelectValue placeholder="Select node type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem
-                  v-for="nodeType in nodeTypes"
-                  :key="nodeType.value"
-                  :value="nodeType.value"
-                >
-                  {{ nodeType.label }}
-                </SelectItem>
-              </SelectContent>
-            </Select>
+            <div class="col-span-3">
+              <Select
+                v-model="formData.type"
+                :class="{ 'border-red-500': errors.type }"
+              >
+                <SelectTrigger class="col-span-3">
+                  <SelectValue placeholder="Select node type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem
+                    v-for="nodeType in nodeTypes"
+                    :key="nodeType.value"
+                    :value="nodeType.value"
+                  >
+                    {{ nodeType.label }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <span v-if="errors.type" class="text-sm text-red-500 mt-1">
+                {{ errors.type }}
+              </span>
+            </div>
           </div>
         </div>
 
